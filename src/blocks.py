@@ -13,23 +13,30 @@ def markdown_to_blocks(markdown):
     line = markdown.split("\n\n")
     new = []
     for i in line:
-        if i != "":
-            i.strip()
-            new.append(i)
+        stripped_lines = [l.strip() for l in i.split("\n")]
+        block = "\n".join(stripped_lines).strip()
+        if block != "":
+            new.append(block)
     return new
 
 def block_to_block_type(block):
     lines = block.split("\n")
-    
+
     if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return BlockType.HEADING
-    elif block.startswith("```\n") and block.endswith("```"):
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return BlockType.CODE
-    elif block.startswith(">"):
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.PARAGRAPH
         return BlockType.QUOTE
-    elif block.startswith("- "):
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.PARAGRAPH
         return BlockType.UNORDERED_LIST
-    elif block.startswith("1. "):
+    if block.startswith("1. "):
         i = 1
         for line in lines:
             if not line.startswith(f"{i}. "):
