@@ -1,6 +1,7 @@
 import os
 import shutil
 from splitdelimiter import markdown_to_html_node
+from pathlib import Path
 
 def copy():
     base = os.path.dirname(os.path.abspath(__file__))
@@ -53,6 +54,18 @@ def generate_page(from_path, template_path, dest_path):
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, "w") as f:
         f.write(full_html)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    ls = os.listdir(dir_path_content)
+    for i in ls:
+        path = os.path.join(dir_path_content, i)
+        if os.path.isfile(path):
+            dest = os.path.join(dest_dir_path, i)
+            dest = Path(dest).with_suffix(".html")
+            generate_page(path, template_path, dest)
+        else:
+            dest = os.path.join(dest_dir_path, i)
+            generate_pages_recursive(path, template_path, dest)
     
 
 
