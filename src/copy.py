@@ -1,5 +1,6 @@
 import os
 import shutil
+from splitdelimiter import markdown_to_html_node
 
 def copy():
     base = os.path.dirname(os.path.abspath(__file__))
@@ -24,3 +25,34 @@ def copy():
     else:
         return "Ruta no encontrada"    
     
+
+def extract_title(markdown):
+    f = open(markdown, mode="r")
+    mk = f.read()
+    f.close()
+    splited = mk.split("\n")
+    for line in splited:
+        if line.startswith("# "):
+            return line[2:]
+    raise Exception("There is no h1")
+        
+
+def generate_page(from_path, template_path, dest_path):
+    print(f'Generating page from {from_path} to {dest_path} using {template_path}')
+    f = open(from_path, mode="r")
+    mdFile = f.read()
+    f.close()
+    f = open(template_path, mode="r")
+    tpFile = f.read()
+    f.close()
+    node = markdown_to_html_node(mdFile)
+    html = node.to_html()
+    title = extract_title(from_path)
+    full_html = tpFile.replace("{{ Title }}", title)
+    full_html = full_html.replace("{{ Content }}", html)
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    with open(dest_path, "w") as f:
+        f.write(full_html)
+    
+
+
